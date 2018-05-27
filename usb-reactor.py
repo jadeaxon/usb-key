@@ -4,12 +4,15 @@
 # PRE: Install Python 3.6.5 or later in Windows 10 (both 64-bit).
 # PRE: Add %USERPROFILE%\AppData\Local\Programs\Python\Python36 to your PATH env var.
 # PRE: Add %USERPROFILE%\AppData\Local\Programs\Python\Python36\Scripts to your PATH env var.
-# PRE: pip install pypiwin32
+# PRE: pip install pypiwin32 # For win32file.
+# PRE: pip install pyautogui # For AHK-like automation in Windows.
 # PRE: You're running this from Windows (PowerShell) as with admin rights, not Cygwin.
 
 import win32file
 import time
 import copy
+# import subprocess
+import os
 
 
 #==============================================================================
@@ -31,11 +34,15 @@ def get_removable_drives():
 
 
 def react_to_drive_connection(drive):
-    print(f"usb-reactor: Drive {drive} was disconnected.");
+    print(f"usb-reactor: Drive {drive} was connected.");
+    user = os.environ['USERNAME'];
+    # TO DO: Detect if KeePass was already running.
+    # This just activates KeePass if it is already launched.
+    os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
 
 
 def react_to_drive_disconnection(drive):
-    print(f"usb-reactor: Drive {drive} was connected.");
+    print(f"usb-reactor: Drive {drive} was disconnected.");
 
 
 #==============================================================================
@@ -61,11 +68,11 @@ while True:
 
     for drive, state in list(previous.items()):
         if drive not in current:
-            react_to_drive_connection(drive);
+            react_to_drive_disconnection(drive);
 
     for drive, state in list(current.items()):
         if drive not in previous:
-            react_to_drive_disconnection(drive);
+            react_to_drive_connection(drive);
 
     previous = copy.deepcopy(current);
     time.sleep(2) # Two seconds.
