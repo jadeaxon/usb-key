@@ -30,6 +30,14 @@ def get_removable_drives():
     return removable_drives
 
 
+def react_to_drive_connection(drive):
+    print(f"usb-reactor: Drive {drive} was disconnected.");
+
+
+def react_to_drive_disconnection(drive):
+    print(f"usb-reactor: Drive {drive} was connected.");
+
+
 #==============================================================================
 # Main
 #==============================================================================
@@ -41,15 +49,23 @@ previous = {}
 current = {}
 
 while True:
-    print('usb-reactor: Scanning for removable drives.')
+    ## print('usb-reactor: Scanning for removable drives.')
     current.clear();
     removable_drives = get_removable_drives();
     for drive in removable_drives:
-        print(drive)
+        ## print(drive)
         current[drive] = 1; # Connected.
 
-    print(previous);
-    print(current);
+    ## print(previous);
+    ## print(current);
+
+    for drive, state in list(previous.items()):
+        if drive not in current:
+            react_to_drive_connection(drive);
+
+    for drive, state in list(current.items()):
+        if drive not in previous:
+            react_to_drive_disconnection(drive);
 
     previous = copy.deepcopy(current);
     time.sleep(2) # Two seconds.
