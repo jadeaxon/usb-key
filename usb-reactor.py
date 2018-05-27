@@ -8,6 +8,8 @@
 # PRE: You're running this from Windows (PowerShell) as with admin rights, not Cygwin.
 
 import win32file
+import time
+import copy
 
 
 #==============================================================================
@@ -33,8 +35,24 @@ def get_removable_drives():
 #==============================================================================
 
 print('usb-reactor: Engaged!');
-removable_drives = get_removable_drives();
-for drive in removable_drives:
-    print(drive)
+
+# Previous and current connection states of all removable drives.
+previous = {}
+current = {}
+
+while True:
+    print('usb-reactor: Scanning for removable drives.')
+    current.clear();
+    removable_drives = get_removable_drives();
+    for drive in removable_drives:
+        print(drive)
+        current[drive] = 1; # Connected.
+
+    print(previous);
+    print(current);
+
+    previous = copy.deepcopy(current);
+    time.sleep(2) # Two seconds.
+
 
 
