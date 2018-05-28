@@ -11,9 +11,9 @@
 import win32file
 import time
 import copy
-# import subprocess
 import os
 import pyautogui
+from tkinter import Tk
 
 
 #==============================================================================
@@ -63,8 +63,9 @@ def react_to_drive_connection(drive):
     # Launch KeePass and get my LastPass password from it.
     # TO DO: Detect if KeePass was already running.
     # This just activates KeePass if it is already launched.
+    time.sleep(2)
     os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
-    time.sleep(1)
+    time.sleep(2)
     pyautogui.typewrite(password)
     pyautogui.press('enter')
     time.sleep(1)
@@ -72,6 +73,32 @@ def react_to_drive_connection(drive):
     pyautogui.press('enter')
     time.sleep(1)
     pyautogui.hotkey('ctrl', 'c')
+
+    # Launch Firefox and enter the LastPass password.
+    os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
+    time.sleep(1)
+    pyautogui.hotkey('ctrl', 'l') # Address bar.
+    pyautogui.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
+    pyautogui.press('enter')
+    time.sleep(8)
+
+    # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
+    # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
+    # to put my e-mail address on the clipboard and paste it instead.
+    tk = Tk()
+    tk.withdraw()
+    password = tk.clipboard_get()
+    tk.clipboard_clear()
+    tk.clipboard_append('jadeaxon@hotmail.com')
+    tk.update() # now it stays on the clipboard after the window is closed
+    tk.destroy()
+
+    pyautogui.hotkey('ctrl', 'v')
+    pyautogui.press('tab')
+    pyautogui.typewrite(password)
+    pyautogui.press('enter')
+    # BAM!
+
 
 def react_to_drive_disconnection(drive):
     print(f"usb-reactor: Drive {drive} was disconnected.")
