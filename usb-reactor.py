@@ -36,6 +36,17 @@ def get_removable_drives():
 def react_to_drive_connection(drive):
     print(f"usb-reactor: Drive {drive} was connected.");
     user = os.environ['USERNAME'];
+    home = os.environ['USERPROFILE'];
+    local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
+    if not os.path.exists(local_keyfile_path):
+        print("usb-reactor: ERROR: Local key file DNE.");
+        return
+
+    usb_keyfile_path = f'{drive}jadeaxon.usb.key'
+    if not os.path.exists(usb_keyfile_path):
+        print("usb-reactor: ERROR: USB key file DNE.");
+        return
+
     # TO DO: Detect if KeePass was already running.
     # This just activates KeePass if it is already launched.
     os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
