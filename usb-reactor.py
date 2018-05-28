@@ -34,17 +34,27 @@ def get_removable_drives():
 
 
 def react_to_drive_connection(drive):
-    print(f"usb-reactor: Drive {drive} was connected.");
+    print(f"usb-reactor: Drive {drive} was connected.")
     user = os.environ['USERNAME'];
     home = os.environ['USERPROFILE'];
     local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
     if not os.path.exists(local_keyfile_path):
-        print("usb-reactor: ERROR: Local key file DNE.");
+        print("usb-reactor: ERROR: Local key file DNE.")
         return
 
     usb_keyfile_path = f'{drive}jadeaxon.usb.key'
     if not os.path.exists(usb_keyfile_path):
-        print("usb-reactor: ERROR: USB key file DNE.");
+        print("usb-reactor: ERROR: USB key file DNE.")
+        return
+
+    local_keyfile = open(local_keyfile_path)
+    local_key = local_keyfile.readlines()
+
+    usb_keyfile = open(usb_keyfile_path)
+    usb_key = usb_keyfile.readlines()
+
+    if local_key[0] != usb_key[0]:
+        print("usb-reactor: ERROR: Keys do not match.")
         return
 
     # TO DO: Detect if KeePass was already running.
@@ -53,7 +63,7 @@ def react_to_drive_connection(drive):
 
 
 def react_to_drive_disconnection(drive):
-    print(f"usb-reactor: Drive {drive} was disconnected.");
+    print(f"usb-reactor: Drive {drive} was disconnected.")
 
 
 #==============================================================================
