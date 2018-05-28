@@ -13,6 +13,7 @@ import time
 import copy
 # import subprocess
 import os
+import pyautogui
 
 
 #==============================================================================
@@ -57,10 +58,20 @@ def react_to_drive_connection(drive):
         print("usb-reactor: ERROR: Keys do not match.")
         return
 
+    password = usb_key[1].rstrip()
+
+    # Launch KeePass and get my LastPass password from it.
     # TO DO: Detect if KeePass was already running.
     # This just activates KeePass if it is already launched.
     os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
-
+    time.sleep(1)
+    pyautogui.typewrite(password)
+    pyautogui.press('enter')
+    time.sleep(1)
+    pyautogui.typewrite('LastPass')
+    pyautogui.press('enter')
+    time.sleep(1)
+    pyautogui.hotkey('ctrl', 'c')
 
 def react_to_drive_disconnection(drive):
     print(f"usb-reactor: Drive {drive} was disconnected.")
