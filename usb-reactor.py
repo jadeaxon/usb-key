@@ -20,6 +20,13 @@ from tkinter import Tk
 from sys import stdout
 from sys import argv
 
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
+
+# Turns raw bytes into characters you can safely store in a text file.
+# Necessary since I want to read the encrypted message back from a non-binary file.
+import base64
+
 
 #==============================================================================
 # Globals
@@ -41,12 +48,41 @@ home = os.environ['USERPROFILE'];
 
 local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
 
+usb_keyfile_path = ""
 usb_key = []
 
 
 #==============================================================================
 # Functions
 #==============================================================================
+
+# PRE: Install Visual Studio 2017 Build Tools (?)--might only apply to pycrypto (which failed).
+# PRE: pip install pycryptodome
+# Using pycryptodome instead of pycrypto because pycrypto failed to install.
+# PRE: You've used ssh-keygen to create an public/private RSA key pair.
+# PRE: The key pair is not passphrase-protected.
+# PRE: The line was encrypted using the public key.
+def read_encrypted_line(path, n):
+    """ Reads encrypted line n from the given key file. """
+    global home
+
+    private_key_path = f'{home}\\.ssh\\usb_key_rsa'
+    private_key_file = open(private_key_path)
+    private_key = private_key_file.read()
+    private_key_object = RSA.importKey(private_key)
+
+    encrypted_file = open(path)
+    encrypted_lines = encrypted_file.readlines()
+    encoded_encrypted_line_from_file_utf8 = encrypted_lines[n].rstrip()
+    encrypted_line_from_file_base64 = encoded_encrypted_line_from_file_utf8.encode("utf-8") # UTF8 -> base 64 bytes.
+    encrypted_line_from_file = base64.b64decode(encrypted_line_from_file_base64) # base64 bytes -> bytes.
+
+    decryption_cipher = PKCS1_OAEP.new(private_key_object)
+    decrypted_line_from_file = decryption_cipher.decrypt(encrypted_line_from_file) # bytes -> bytes.
+    decoded_decrypted_line_from_file = decrypted_line_from_file.decode("utf-8") # bytes -> UTF8.
+
+    return decoded_decrypted_line_from_file
+
 
 def get_removable_drives():
     """ Returns a list of all connected removable drives. """
@@ -63,7 +99,7 @@ def get_removable_drives():
 
 
 def react_to_drive_connection(drive):
-    global usb_key, user, home, local_keyfile_path
+    global usb_key, user, home, local_keyfile_path, usb_keyfile_path
 
     print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
@@ -91,9 +127,10 @@ def react_to_drive_connection(drive):
 
 
 def launch_KeePass():
-    global usb_key, user, home, local_keyfile_path
+    global usb_key, user, home, local_keyfile_path, usb_keyfile_path
 
-    password = usb_key[1].rstrip()
+    password = read_encrypted_line(usb_keyfile_path, 1)
+    ## password = usb_key[1].rstrip()
 
     # Launch KeePass and get my LastPass password from it.
     # TO DO: Detect if KeePass was already running.
@@ -139,10 +176,12 @@ def launch_LastPass():
 # CON: You cannot automate keystrokes to Cygwin (if it is running as admin).
 # CON: pyautogui mouse automation doesn't work in Cygwin (if it is running as admin)!
 def launch_Cygwin():
-    global usb_key, user, home, local_keyfile_path
+    global usb_key, user, home, local_keyfile_path, usb_keyfile_path
 
-    password1 = usb_key[2].rstrip()
-    password2 = usb_key[3].rstrip()
+    ## password1 = usb_key[2].rstrip()
+    password1 = read_encrypted_line(usb_keyfile_path, 2)
+    ## password2 = usb_key[3].rstrip()
+    password2 = read_encrypted_line(usb_keyfile_path, 3)
 
     ## print(f"{S}: password1 = {password1}.")
     ## print(f"{S}: password2 = {password2}.")
@@ -177,8 +216,26 @@ def react_to_drive_disconnection(drive):
 
 
 #==============================================================================
+# Tests
+#==============================================================================
+
+def test__read_encrypted_line():
+    kfpath = 'E:\\jadeaxon.usb.key'
+    password1 = read_encrypted_line(kfpath, 1)
+    print(password1)
+    password2 = read_encrypted_line(kfpath, 2)
+    print(password2)
+    password3 = read_encrypted_line(kfpath, 3)
+    print(password3)
+
+
+#==============================================================================
 # Main
 #==============================================================================
+
+if arg1 == 'test':
+    test__read_encrypted_line()
+    exit(0)
 
 pid = os.getpid()
 print(f'{S}: Engaged!')
@@ -217,6 +274,5 @@ while True:
     previous = copy.deepcopy(current);
     stdout.flush();
     time.sleep(3) # Two seconds.
-
 
 
