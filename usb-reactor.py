@@ -127,16 +127,15 @@ def react_to_drive_connection(drive):
 
 
 def launch_KeePass():
-    global usb_key, user, home, local_keyfile_path, usb_keyfile_path
+    global home, usb_keyfile_path
 
     password = read_encrypted_line(usb_keyfile_path, 1)
-    ## password = usb_key[1].rstrip()
 
     # Launch KeePass and get my LastPass password from it.
     # TO DO: Detect if KeePass was already running.
     # This just activates KeePass if it is already launched.
     time.sleep(2)
-    os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
+    os.startfile(f'{home}\\Dropbox\\KeePass Database.kdbx')
     time.sleep(2)
     bot.typewrite(password)
     bot.press('enter')
@@ -153,8 +152,8 @@ def launch_LastPass():
     os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
     time.sleep(5)
     bot.hotkey('ctrl', 'l') # Address bar.
+    time.sleep(1)
     bot.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
-    ## bot.typewrite('https://lastpass.com/?&ac=1&fromwebsite=1&newvault=1&nk=1')
     bot.press('enter')
     time.sleep(10)
 
@@ -176,15 +175,10 @@ def launch_LastPass():
 # CON: You cannot automate keystrokes to Cygwin (if it is running as admin).
 # CON: pyautogui mouse automation doesn't work in Cygwin (if it is running as admin)!
 def launch_Cygwin():
-    global usb_key, user, home, local_keyfile_path, usb_keyfile_path
+    global usb_keyfile_path
 
-    ## password1 = usb_key[2].rstrip()
     password1 = read_encrypted_line(usb_keyfile_path, 2)
-    ## password2 = usb_key[3].rstrip()
     password2 = read_encrypted_line(usb_keyfile_path, 3)
-
-    ## print(f"{S}: password1 = {password1}.")
-    ## print(f"{S}: password2 = {password2}.")
 
     os.startfile('C:\\Users\\Public\\Desktop\\Cygwin64 Terminal.lnk')
     time.sleep(10)
@@ -253,15 +247,10 @@ previous = {}
 current = {}
 
 while True:
-    ## print(f'{S}: Scanning for removable drives.')
     current.clear();
     removable_drives = get_removable_drives();
     for drive in removable_drives:
-        ## print(drive)
         current[drive] = 1; # Connected.
-
-    ## print(previous);
-    ## print(current);
 
     for drive, state in list(previous.items()):
         if drive not in current:
@@ -273,6 +262,6 @@ while True:
 
     previous = copy.deepcopy(current);
     stdout.flush();
-    time.sleep(3) # Two seconds.
+    time.sleep(3)
 
 
