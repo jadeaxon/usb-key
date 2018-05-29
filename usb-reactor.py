@@ -27,6 +27,8 @@ from Crypto.Cipher import PKCS1_OAEP
 # Necessary since I want to read the encrypted message back from a non-binary file.
 import base64
 
+import ctypes # To implement get_all_window_titles().
+
 
 #==============================================================================
 # Globals
@@ -209,6 +211,34 @@ def react_to_drive_disconnection(drive):
     print(f"{S}: Drive {drive} was disconnected.")
 
 
+def get_all_window_titles():
+    """ Returns a list of all window titles. """
+    EnumWindows = ctypes.windll.user32.EnumWindows
+    EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+    GetWindowText = ctypes.windll.user32.GetWindowTextW
+    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+    IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+
+    titles = []
+    def foreach_window(hwnd, lParam):
+        if IsWindowVisible(hwnd):
+            length = GetWindowTextLength(hwnd)
+            buff = ctypes.create_unicode_buffer(length + 1)
+            GetWindowText(hwnd, buff, length + 1)
+            titles.append(buff.value)
+        return True
+    EnumWindows(EnumWindowsProc(foreach_window), 0)
+
+    return titles
+
+
+def window_exists(title):
+    titles = get_all_window_titles()
+    if title in titles:
+        return True
+    return False
+
+
 #==============================================================================
 # Tests
 #==============================================================================
@@ -223,12 +253,30 @@ def test__read_encrypted_line():
     print(password3)
 
 
+def test__get_all_window_titles():
+    titles = get_all_window_titles()
+    search = 'My LastPass Vault - Mozilla Firefox'
+    print(titles)
+
+
+def test__window_exists():
+    title = 'My LastPass Vault - Mozilla Firefox'
+    exists = window_exists(title)
+    print(exists)
+
+    title = 'This window does not exist'
+    exists = window_exists(title)
+    print(exists)
+
+
 #==============================================================================
 # Main
 #==============================================================================
 
-if arg1 == 'test':
+if arg1 == '--test':
     test__read_encrypted_line()
+    test__get_all_window_titles()
+    test__window_exists()
     exit(0)
 
 pid = os.getpid()
