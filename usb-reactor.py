@@ -102,6 +102,7 @@ def get_removable_drives():
 
 def react_to_drive_connection(drive):
     global usb_key, user, home, local_keyfile_path, usb_keyfile_path
+    global lastpass_password
 
     print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
@@ -127,9 +128,16 @@ def react_to_drive_connection(drive):
     launch_LastPass()
     launch_Cygwin()
 
+    # Sometimes the LastPass login fails.  Let's retry it if so.
+    if not window_exists('My LastPass Vault - Mozilla Firefox'):
+        print(f"{S}: Retrying LastPass login.  First attempt failed.")
+        launch_LastPass()
+
+    lastpass_password = ""
+
 
 def launch_KeePass():
-    global home, usb_keyfile_path
+    global home, usb_keyfile_path, lastpass_password
 
     password = read_encrypted_line(usb_keyfile_path, 1)
 
@@ -146,10 +154,14 @@ def launch_KeePass():
     bot.press('enter')
     time.sleep(1)
     bot.hotkey('ctrl', 'c')
+    time.sleep(1)
+    lastpass_password = read_clipboard()
 
 
-# PRE: launch_KeePass() was successful so that you have the LastPass password in clipboard.
+# PRE: launch_KeePass() was successful so that you have the LastPass password saved.
 def launch_LastPass():
+    global lastpass_password
+
     # Launch Firefox and enter the LastPass password.
     os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
     time.sleep(5)
@@ -162,12 +174,11 @@ def launch_LastPass():
     # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
     # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
     # to put my e-mail address on the clipboard and paste it instead.
-    password = read_clipboard()
     save_to_clipboard('jadeaxon@hotmail.com')
 
     bot.hotkey('ctrl', 'v')
     bot.press('tab')
-    bot.typewrite(password)
+    bot.typewrite(lastpass_password)
     bot.press('enter')
     # BAM!
 
