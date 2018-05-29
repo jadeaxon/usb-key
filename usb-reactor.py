@@ -31,7 +31,9 @@ arg1 = 'unknown'
 try:
     S, arg1 = argv
 except ValueError:
+    S = argv[0]
     arg1 = '' # Not boottime.
+S = os.path.basename(S)
 
 # Check the environment.
 user = os.environ['USERNAME'];
@@ -65,12 +67,12 @@ def react_to_drive_connection(drive):
 
     print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
-        print("usb-reactor: ERROR: Local key file DNE.")
+        print(f"{S}: ERROR: Local key file DNE.")
         return
 
     usb_keyfile_path = f'{drive}jadeaxon.usb.key'
     if not os.path.exists(usb_keyfile_path):
-        print("usb-reactor: ERROR: USB key file DNE.")
+        print(f"{S}: ERROR: USB key file DNE.")
         return
 
     local_keyfile = open(local_keyfile_path)
@@ -80,7 +82,7 @@ def react_to_drive_connection(drive):
     usb_key = usb_keyfile.readlines()
 
     if local_key[0] != usb_key[0]:
-        print("usb-reactor: ERROR: Keys do not match.")
+        print(f"{S}: ERROR: Keys do not match.")
         return
 
     launch_KeePass()
@@ -142,8 +144,8 @@ def launch_Cygwin():
     password1 = usb_key[2].rstrip()
     password2 = usb_key[3].rstrip()
 
-    ## print(f"usb-reactor: password1 = {password1}.")
-    ## print(f"usb-reactor: password2 = {password2}.")
+    ## print(f"{S}: password1 = {password1}.")
+    ## print(f"{S}: password2 = {password2}.")
 
     os.startfile('C:\\Users\\Public\\Desktop\\Cygwin64 Terminal.lnk')
     time.sleep(10)
@@ -171,7 +173,7 @@ def read_clipboard():
 
 
 def react_to_drive_disconnection(drive):
-    print(f"usb-reactor: Drive {drive} was disconnected.")
+    print(f"{S}: Drive {drive} was disconnected.")
 
 
 #==============================================================================
@@ -179,8 +181,8 @@ def react_to_drive_disconnection(drive):
 #==============================================================================
 
 pid = os.getpid()
-print('usb-reactor: Engaged!')
-print(f'usb-reactor: PID = {pid}.')
+print(f'{S}: Engaged!')
+print(f'{S}: PID = {pid}.')
 # This gets passed in by the .bat wrapper that is used for start-at-boot.
 if arg1 == 'boot':
     print(f'{S}: Waiting a moment for system boot to gel.')
@@ -194,7 +196,7 @@ previous = {}
 current = {}
 
 while True:
-    ## print('usb-reactor: Scanning for removable drives.')
+    ## print(f'{S}: Scanning for removable drives.')
     current.clear();
     removable_drives = get_removable_drives();
     for drive in removable_drives:
