@@ -14,6 +14,7 @@ import copy
 import os
 import pyautogui
 from tkinter import Tk
+from sys import stdout
 
 
 #==============================================================================
@@ -108,7 +109,11 @@ def react_to_drive_disconnection(drive):
 # Main
 #==============================================================================
 
-print('usb-reactor: Engaged!');
+pid = os.getpid()
+print('usb-reactor: Engaged!')
+print(f'usb-reactor: PID = {pid}.')
+# To kill in Windows:
+# taskkill /F /PID <pid>
 
 # Previous and current connection states of all removable drives.
 previous = {}
@@ -127,13 +132,14 @@ while True:
 
     for drive, state in list(previous.items()):
         if drive not in current:
-            react_to_drive_disconnection(drive);
+            react_to_drive_disconnection(drive)
 
     for drive, state in list(current.items()):
         if drive not in previous:
-            react_to_drive_connection(drive);
+            react_to_drive_connection(drive)
 
     previous = copy.deepcopy(current);
+    stdout.flush();
     time.sleep(2) # Two seconds.
 
 
