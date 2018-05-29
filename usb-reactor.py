@@ -7,6 +7,8 @@
 # PRE: pip install pypiwin32 # For win32file.
 # PRE: pip install pyautogui # For AHK-like automation in Windows.
 # PRE: You're running this from Windows (PowerShell) as with admin rights, not Cygwin.
+# PRE: Cisco AnyConnect VPN client GUI is not started at boot.
+# It starts late and interferes with the LastPass login.
 
 import win32file
 import time
@@ -16,12 +18,22 @@ import pyautogui
 bot = pyautogui
 from tkinter import Tk
 from sys import stdout
+from sys import argv
 
 
 #==============================================================================
 # Globals
 #==============================================================================
 
+# Process command-line args.
+S = 'unknown'
+arg1 = 'unknown'
+try:
+    S, arg1 = argv
+except ValueError:
+    arg1 = '' # Not boottime.
+
+# Check the environment.
 user = os.environ['USERNAME'];
 home = os.environ['USERPROFILE'];
 
@@ -51,7 +63,7 @@ def get_removable_drives():
 def react_to_drive_connection(drive):
     global usb_key, user, home, local_keyfile_path
 
-    print(f"usb-reactor: Drive {drive} was connected.")
+    print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
         print("usb-reactor: ERROR: Local key file DNE.")
         return
@@ -169,6 +181,11 @@ def react_to_drive_disconnection(drive):
 pid = os.getpid()
 print('usb-reactor: Engaged!')
 print(f'usb-reactor: PID = {pid}.')
+# This gets passed in by the .bat wrapper that is used for start-at-boot.
+if arg1 == 'boot':
+    print(f'{S}: Waiting a moment for system boot to gel.')
+    time.sleep(15) # Let stuff gel at boot time.
+
 # To kill in Windows:
 # taskkill /F /PID <pid>
 
