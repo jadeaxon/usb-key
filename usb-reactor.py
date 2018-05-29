@@ -73,7 +73,7 @@ def react_to_drive_connection(drive):
 
     launch_KeePass()
     launch_LastPass()
-    ## launch_Cygwin()
+    launch_Cygwin()
 
 
 def launch_KeePass():
@@ -120,26 +120,25 @@ def launch_LastPass():
     # BAM!
 
 
+# PRE: mintty.exe (the Cygwin terminal) must not be running as admin.
 # CON: You cannot automate keystokes in the UAC dialog.
-# CON: You cannot automate keystrokes to Cygwin.
-# CON: pyautogui mouse automation doesn't work in Cygwin!
+# CON: You cannot automate keystrokes to Cygwin (if it is running as admin).
+# CON: pyautogui mouse automation doesn't work in Cygwin (if it is running as admin)!
 def launch_Cygwin():
     global usb_key, user, home, local_keyfile_path
 
-    password1 = usb_key[2].rtrim()
-    password2 = usb_key[3].rtrim()
+    password1 = usb_key[2].rstrip()
+    password2 = usb_key[3].rstrip()
 
-    print(f"usb-reactor: password1 = {password1}.")
-    print(f"usb-reactor: password2 = {password2}.")
+    ## print(f"usb-reactor: password1 = {password1}.")
+    ## print(f"usb-reactor: password2 = {password2}.")
 
     os.startfile('C:\\Users\\Public\\Desktop\\Cygwin64 Terminal.lnk')
     time.sleep(10)
-    # PROBLEM: It's a pain to disable UAC for one app.  You can't automate keystrokes in that window.
-    save_to_clipboard(password1)
-    time.sleep(1)
-    print(f"usb-reactor: Moving mouse.")
-    bot.moveTo(300, 300)
-    bot.rightClick()
+    bot.typewrite(password1)
+    bot.press('enter')
+    bot.typewrite(password2)
+    bot.press('enter')
 
 
 def save_to_clipboard(s):
