@@ -13,8 +13,21 @@ import time
 import copy
 import os
 import pyautogui
+bot = pyautogui
 from tkinter import Tk
 from sys import stdout
+
+
+#==============================================================================
+# Globals
+#==============================================================================
+
+user = os.environ['USERNAME'];
+home = os.environ['USERPROFILE'];
+
+local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
+
+usb_key = []
 
 
 #==============================================================================
@@ -36,10 +49,9 @@ def get_removable_drives():
 
 
 def react_to_drive_connection(drive):
+    global usb_key, user, home, local_keyfile_path
+
     print(f"usb-reactor: Drive {drive} was connected.")
-    user = os.environ['USERNAME'];
-    home = os.environ['USERPROFILE'];
-    local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
     if not os.path.exists(local_keyfile_path):
         print("usb-reactor: ERROR: Local key file DNE.")
         return
@@ -59,6 +71,14 @@ def react_to_drive_connection(drive):
         print("usb-reactor: ERROR: Keys do not match.")
         return
 
+    launch_KeePass()
+    launch_LastPass()
+    ## launch_Cygwin()
+
+
+def launch_KeePass():
+    global usb_key, user, home, local_keyfile_path
+
     password = usb_key[1].rstrip()
 
     # Launch KeePass and get my LastPass password from it.
@@ -67,39 +87,76 @@ def react_to_drive_connection(drive):
     time.sleep(2)
     os.startfile(f'C:\\Users\\{user}\\Dropbox\\KeePass Database.kdbx')
     time.sleep(2)
-    pyautogui.typewrite(password)
-    pyautogui.press('enter')
+    bot.typewrite(password)
+    bot.press('enter')
     time.sleep(1)
-    pyautogui.typewrite('LastPass')
-    pyautogui.press('enter')
+    bot.typewrite('LastPass')
+    bot.press('enter')
     time.sleep(1)
-    pyautogui.hotkey('ctrl', 'c')
+    bot.hotkey('ctrl', 'c')
 
+
+# PRE: launch_KeePass() was successful so that you have the LastPass password in clipboard.
+def launch_LastPass():
     # Launch Firefox and enter the LastPass password.
     os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
     time.sleep(5)
-    pyautogui.hotkey('ctrl', 'l') # Address bar.
-    pyautogui.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
-    ## pyautogui.typewrite('https://lastpass.com/?&ac=1&fromwebsite=1&newvault=1&nk=1')
-    pyautogui.press('enter')
+    bot.hotkey('ctrl', 'l') # Address bar.
+    bot.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
+    ## bot.typewrite('https://lastpass.com/?&ac=1&fromwebsite=1&newvault=1&nk=1')
+    bot.press('enter')
     time.sleep(10)
 
     # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
     # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
     # to put my e-mail address on the clipboard and paste it instead.
+    password = read_clipboard()
+    save_to_clipboard('jadeaxon@hotmail.com')
+
+    bot.hotkey('ctrl', 'v')
+    bot.press('tab')
+    bot.typewrite(password)
+    bot.press('enter')
+    # BAM!
+
+
+# CON: You cannot automate keystokes in the UAC dialog.
+# CON: You cannot automate keystrokes to Cygwin.
+# CON: pyautogui mouse automation doesn't work in Cygwin!
+def launch_Cygwin():
+    global usb_key, user, home, local_keyfile_path
+
+    password1 = usb_key[2].rtrim()
+    password2 = usb_key[3].rtrim()
+
+    print(f"usb-reactor: password1 = {password1}.")
+    print(f"usb-reactor: password2 = {password2}.")
+
+    os.startfile('C:\\Users\\Public\\Desktop\\Cygwin64 Terminal.lnk')
+    time.sleep(10)
+    # PROBLEM: It's a pain to disable UAC for one app.  You can't automate keystrokes in that window.
+    save_to_clipboard(password1)
+    time.sleep(1)
+    print(f"usb-reactor: Moving mouse.")
+    bot.moveTo(300, 300)
+    bot.rightClick()
+
+
+def save_to_clipboard(s):
     tk = Tk()
     tk.withdraw()
-    password = tk.clipboard_get()
     tk.clipboard_clear()
-    tk.clipboard_append('jadeaxon@hotmail.com')
-    tk.update() # now it stays on the clipboard after the window is closed
+    tk.clipboard_append(s)
+    tk.update()
     tk.destroy()
 
-    pyautogui.hotkey('ctrl', 'v')
-    pyautogui.press('tab')
-    pyautogui.typewrite(password)
-    pyautogui.press('enter')
-    # BAM!
+
+def read_clipboard():
+    tk = Tk()
+    tk.withdraw()
+    contents = tk.clipboard_get()
+    tk.destroy()
+    return contents
 
 
 def react_to_drive_disconnection(drive):
