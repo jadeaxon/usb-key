@@ -77,11 +77,12 @@ def react_to_drive_connection(drive):
 
     # Launch Firefox and enter the LastPass password.
     os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
-    time.sleep(1)
+    time.sleep(5)
     pyautogui.hotkey('ctrl', 'l') # Address bar.
     pyautogui.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
+    ## pyautogui.typewrite('https://lastpass.com/?&ac=1&fromwebsite=1&newvault=1&nk=1')
     pyautogui.press('enter')
-    time.sleep(8)
+    time.sleep(10)
 
     # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
     # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
@@ -140,7 +141,7 @@ while True:
 
     previous = copy.deepcopy(current);
     stdout.flush();
-    time.sleep(2) # Two seconds.
+    time.sleep(3) # Two seconds.
 
 
 
