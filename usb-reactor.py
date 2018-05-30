@@ -250,12 +250,22 @@ def window_exists(title):
     return False
 
 
+def firefox_is_running():
+    titles = get_all_window_titles()
+    for title in titles:
+        if title.endswith('- Mozilla Firefox'):
+            return True
+    return False
+
+
 #==============================================================================
 # Tests
 #==============================================================================
 
 def test__read_encrypted_line():
     kfpath = 'E:\\jadeaxon.usb.key'
+    if not os.path.exists(kfpath):
+        kfpath = 'D:\\jadeaxon.usb.key'
     password1 = read_encrypted_line(kfpath, 1)
     print(password1)
     password2 = read_encrypted_line(kfpath, 2)
@@ -280,6 +290,11 @@ def test__window_exists():
     print(exists)
 
 
+def test__firefox_is_running():
+    running = firefox_is_running()
+    print(running)
+
+
 #==============================================================================
 # Main
 #==============================================================================
@@ -288,6 +303,7 @@ if arg1 == '--test':
     test__read_encrypted_line()
     test__get_all_window_titles()
     test__window_exists()
+    test__firefox_is_running()
     exit(0)
 
 pid = os.getpid()
