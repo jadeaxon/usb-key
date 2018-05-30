@@ -6,16 +6,19 @@
 # PRE: Add %USERPROFILE%\AppData\Local\Programs\Python\Python36\Scripts to your PATH env var.
 # PRE: pip install pypiwin32 # For win32file.
 # PRE: pip install pyautogui # For AHK-like automation in Windows.
+# PRE: pip install pywinauto # Also for AHK-like automation in Windows.
 # PRE: You're running this from Windows (PowerShell) as with admin rights, not Cygwin.
 # PRE: Cisco AnyConnect VPN client GUI is not started at boot.
 # It starts late and interferes with the LastPass login.
 
 import win32file
+import win32gui
 import time
 import copy
 import os
 import pyautogui
 bot = pyautogui
+import pywinauto
 from tkinter import Tk
 from sys import stdout
 from sys import argv
@@ -52,6 +55,8 @@ local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
 
 usb_keyfile_path = ""
 usb_key = []
+
+firefox_window_title = ""
 
 
 #==============================================================================
@@ -160,16 +165,26 @@ def launch_KeePass():
 
 # PRE: launch_KeePass() was successful so that you have the LastPass password saved.
 def launch_LastPass():
-    global lastpass_password
+    global lastpass_password, firefox_window_title
 
     # Launch Firefox and enter the LastPass password.
-    os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
-    time.sleep(5)
+    if not firefox_is_running():
+        os.startfile('C:\\Program Files\\Mozilla Firefox\\firefox.exe')
+        time.sleep(5)
+    else:
+        # Activate the existing Firefox window.
+        activate_firefox_window()
+        time.sleep(1)
+        # FAIL: This technique is not reliable.  May be Programmer Dvorak interacting badly with the bot.
+        # bot.hotkey('win', 't')
+        # bot.press(firefox_window_title[0])
+        # bot.press('enter')
+
     bot.hotkey('ctrl', 'l') # Address bar.
     time.sleep(1)
     bot.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
     bot.press('enter')
-    time.sleep(10)
+    time.sleep(15)
 
     # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
     # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
@@ -251,11 +266,40 @@ def window_exists(title):
 
 
 def firefox_is_running():
+    global firefox_window_title
     titles = get_all_window_titles()
     for title in titles:
         if title.endswith('- Mozilla Firefox'):
+            firefox_window_title = title
             return True
     return False
+
+
+def windowEnumerationHandler(hwnd, top_windows):
+    top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
+
+
+def activate_firefox_window():
+    # FAIL:
+    # app = pywinauto.application.Application()
+    # t, c = firefox_window_title, 'MozillaWindowClass'
+    # print(t)
+    # print(c)
+    # # handle = pywinauto.findwindows.find_windows(title=t, class_name=c)[0]
+    # handle = pywinauto.findwindows.find_windows(title=t)[0]
+    # app.connect(title=t)
+    # window = app.window_(handle=handle)
+    # window.SetFocus()
+
+    windows = [] # Top-level windows.
+    win32gui.EnumWindows(windowEnumerationHandler, windows)
+    # Each window is a (handle, title) tuple.
+    for window in windows:
+        if "firefox" in window[1].lower():
+            ## print(window)
+            win32gui.ShowWindow(window[0], 5)
+            win32gui.SetForegroundWindow(window[0])
+            break
 
 
 #==============================================================================
@@ -295,6 +339,10 @@ def test__firefox_is_running():
     print(running)
 
 
+def test__activate_firefox_window():
+    activate_firefox_window()
+
+
 #==============================================================================
 # Main
 #==============================================================================
@@ -304,6 +352,7 @@ if arg1 == '--test':
     test__get_all_window_titles()
     test__window_exists()
     test__firefox_is_running()
+    test__activate_firefox_window()
     exit(0)
 
 pid = os.getpid()
