@@ -20,6 +20,7 @@ import pyautogui
 bot = pyautogui
 import pywinauto
 from tkinter import Tk
+from tkinter.messagebox import askyesno, NO
 from sys import stdout
 from sys import argv
 
@@ -57,6 +58,8 @@ usb_keyfile_path = ""
 usb_key = []
 
 firefox_window_title = ""
+
+first_activation = True
 
 
 #==============================================================================
@@ -107,7 +110,7 @@ def get_removable_drives():
 
 def react_to_drive_connection(drive):
     global usb_key, user, home, local_keyfile_path, usb_keyfile_path
-    global lastpass_password
+    global lastpass_password, first_activation, S
 
     print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
@@ -118,6 +121,14 @@ def react_to_drive_connection(drive):
     if not os.path.exists(usb_keyfile_path):
         print(f"{S}: ERROR: USB key file DNE.")
         return
+
+    if not first_activation:
+        tk = Tk() # Create main window.
+        tk.withdraw() # Hide main window.  Else dialog creates visible one.
+        time.sleep(3) # Let Explorer window for USB drive show up first.
+        proceed = askyesno(S, 'Unlock computer?', default=NO)
+        tk.destroy()
+        if not proceed: return
 
     local_keyfile = open(local_keyfile_path)
     local_key = local_keyfile.readlines()
@@ -310,6 +321,10 @@ def test__read_encrypted_line():
     kfpath = 'E:\\jadeaxon.usb.key'
     if not os.path.exists(kfpath):
         kfpath = 'D:\\jadeaxon.usb.key'
+    if not os.path.exists(kfpath):
+        print(f'{S}: ERROR: Can''t find key file.  Skipping test.')
+        return
+
     password1 = read_encrypted_line(kfpath, 1)
     print(password1)
     password2 = read_encrypted_line(kfpath, 2)
@@ -348,11 +363,15 @@ def test__activate_firefox_window():
 #==============================================================================
 
 if arg1 == '--test':
-    test__read_encrypted_line()
-    test__get_all_window_titles()
-    test__window_exists()
-    test__firefox_is_running()
-    test__activate_firefox_window()
+    tk = Tk() # Create main window.
+    tk.withdraw() # Hide main window.  Else dialog creates visible one.
+    if askyesno('Run Tests?', 'Do you want to run the tests?'):
+        test__read_encrypted_line()
+        test__get_all_window_titles()
+        test__window_exists()
+        test__firefox_is_running()
+        test__activate_firefox_window()
+    tk.destroy() # Destroy main window.
     exit(0)
 
 pid = os.getpid()
@@ -383,6 +402,7 @@ while True:
     for drive, state in list(current.items()):
         if drive not in previous:
             react_to_drive_connection(drive)
+            first_activation = False
 
     previous = copy.deepcopy(current);
     stdout.flush();
