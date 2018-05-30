@@ -209,7 +209,7 @@ def launch_Cygwin():
     password2 = read_encrypted_line(usb_keyfile_path, 3)
 
     os.startfile('C:\\Users\\Public\\Desktop\\Cygwin64 Terminal.lnk')
-    time.sleep(10)
+    time.sleep(15)
     bot.typewrite(password1)
     bot.press('enter')
     bot.typewrite(password2)
