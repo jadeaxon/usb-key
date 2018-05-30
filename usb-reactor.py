@@ -378,7 +378,7 @@ pid = os.getpid()
 print(f'{S}: Engaged!')
 print(f'{S}: PID = {pid}.')
 # This gets passed in by the .bat wrapper that is used for start-at-boot.
-if arg1 == 'boot':
+if arg1 == '--boot':
     print(f'{S}: Waiting a moment for system boot to gel.')
     time.sleep(15) # Let stuff gel at boot time.
 
