@@ -59,7 +59,8 @@ usb_key = []
 
 firefox_window_title = ""
 
-first_activation = True
+first_activation = True # Is this the first time USB key is reacted to?
+testing = False # Are we running with --test option?
 
 
 #==============================================================================
@@ -184,7 +185,7 @@ def launch_LastPass():
         time.sleep(5)
     else:
         # Activate the existing Firefox window.
-        activate_firefox_window()
+        activate_window("Firefox")
         time.sleep(1)
         # FAIL: This technique is not reliable.  May be Programmer Dvorak interacting badly with the bot.
         # bot.hotkey('win', 't')
@@ -290,27 +291,20 @@ def windowEnumerationHandler(hwnd, top_windows):
     top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
 
 
-def activate_firefox_window():
-    # FAIL:
-    # app = pywinauto.application.Application()
-    # t, c = firefox_window_title, 'MozillaWindowClass'
-    # print(t)
-    # print(c)
-    # # handle = pywinauto.findwindows.find_windows(title=t, class_name=c)[0]
-    # handle = pywinauto.findwindows.find_windows(title=t)[0]
-    # app.connect(title=t)
-    # window = app.window_(handle=handle)
-    # window.SetFocus()
+def activate_window(partial_title):
+    """ Activates the first window it finds that partially matches case-insensitive. """
+    global testing
 
     windows = [] # Top-level windows.
     win32gui.EnumWindows(windowEnumerationHandler, windows)
     # Each window is a (handle, title) tuple.
     for window in windows:
-        if "firefox" in window[1].lower():
-            ## print(window)
+        if partial_title.lower() in window[1].lower():
+            if testing: print(window)
             win32gui.ShowWindow(window[0], 5)
             win32gui.SetForegroundWindow(window[0])
             break
+
 
 
 #==============================================================================
@@ -354,8 +348,8 @@ def test__firefox_is_running():
     print(running)
 
 
-def test__activate_firefox_window():
-    activate_firefox_window()
+def test__activate_window():
+    activate_window("Firefox")
 
 
 #==============================================================================
@@ -363,6 +357,7 @@ def test__activate_firefox_window():
 #==============================================================================
 
 if arg1 == '--test':
+    testing = True
     tk = Tk() # Create main window.
     tk.withdraw() # Hide main window.  Else dialog creates visible one.
     if askyesno('Run Tests?', 'Do you want to run the tests?'):
@@ -370,7 +365,7 @@ if arg1 == '--test':
         test__get_all_window_titles()
         test__window_exists()
         test__firefox_is_running()
-        test__activate_firefox_window()
+        test__activate_window()
     tk.destroy() # Destroy main window.
     exit(0)
 
