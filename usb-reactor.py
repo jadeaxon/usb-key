@@ -151,6 +151,7 @@ def react_to_drive_connection(drive):
         launch_LastPass()
 
     lastpass_password = ""
+    first_activation = False
 
 
 def launch_KeePass():
@@ -407,7 +408,6 @@ while True:
     for drive, state in list(current.items()):
         if drive not in previous:
             react_to_drive_connection(drive)
-            first_activation = False
 
     previous = copy.deepcopy(current);
     stdout.flush();
