@@ -60,6 +60,7 @@ usb_key = []
 firefox_window_title = ""
 
 first_activation = True # Is this the first time USB key is reacted to?
+drive_reacted_to = "" # The disk drive last successfully reacted to.
 testing = False # Are we running with --test option?
 
 
@@ -112,6 +113,7 @@ def get_removable_drives():
 def react_to_drive_connection(drive):
     global usb_key, user, home, local_keyfile_path, usb_keyfile_path
     global lastpass_password, first_activation, S
+    global drive_reacted_to
 
     print(f"{S}: Drive {drive} was connected.")
     if not os.path.exists(local_keyfile_path):
@@ -152,6 +154,7 @@ def react_to_drive_connection(drive):
 
     lastpass_password = ""
     first_activation = False
+    drive_reacted_to = drive
 
 
 def launch_KeePass():
@@ -255,7 +258,15 @@ def read_clipboard():
 
 
 def react_to_drive_disconnection(drive):
+    global home, drive_reacted_to
     print(f"{S}: Drive {drive} was disconnected.")
+
+    # Start apps I only want started after unlocking the machine is complete.
+    # Also, taking the USB key out is good because it gets really hot if you leave it in forever.
+    if drive == drive_reacted_to:
+        os.startfile(f'{home}\\AppData\\Local\\slack\\slack.exe')
+        os.startfile(f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc\\Discord.lnk')
+        os.startfile(f'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk')
 
 
 def get_all_window_titles():
