@@ -143,6 +143,11 @@ def react_to_drive_connection(drive):
         print(f"{S}: ERROR: Keys do not match.")
         return
 
+    # If Outlook wasn't shut down properly, it may restart at boot.
+    outlook_title = 'Inbox - Jeff.Anderson@uvu.edu - Outlook'
+    if window_exists(outlook_title):
+        close_window(outlook_title)
+
     launch_KeePass()
     launch_LastPass()
     launch_Cygwin()
@@ -297,6 +302,12 @@ def window_exists(title):
     return False
 
 
+# PRE: A window with the given title exists.
+def close_window(title):
+    app = pywinauto.application.Application().connect(title=title)
+    app.kill()
+
+
 def firefox_is_running():
     global firefox_window_title
     titles = get_all_window_titles()
@@ -373,6 +384,9 @@ def test__activate_window():
     time.sleep(2)
     activate_window("Open Database - KeePass Database.kdbx")
 
+def test__close_window():
+    close_window("Inbox - Jeff.Anderson@uvu.edu - Outlook")
+
 
 #==============================================================================
 # Main
@@ -388,6 +402,7 @@ if arg1 == '--test':
         test__window_exists()
         test__firefox_is_running()
         test__activate_window()
+        test__close_window()
     tk.destroy() # Destroy main window.
     exit(0)
 
