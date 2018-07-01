@@ -7,6 +7,7 @@
 # PRE: pip install pypiwin32 # For win32file.
 # PRE: pip install pyautogui # For AHK-like automation in Windows.
 # PRE: pip install pywinauto # Also for AHK-like automation in Windows.
+# PRE: pip install pycryptodome
 # PRE: You're running this from Windows (PowerShell) as with admin rights, not Cygwin.
 # PRE: Cisco AnyConnect VPN client GUI is not started at boot.
 # It starts late and interferes with the LastPass login.
