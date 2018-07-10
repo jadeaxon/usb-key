@@ -176,10 +176,14 @@ def launch_KeePass():
     time.sleep(2)
     if window_exists('Update Check - KeePass'):
         bot.press('enter')
+
     # Sometimes after KeePass is launched it does the orange flashy thing
     # where the window wants attention but was not activated for some reason.
     activate_window("Open Database - KeePass Database.kdbx")
     time.sleep(1)
+    activate_window("Open Database - KeePass Database.kdbx")
+    time.sleep(1)
+
     bot.typewrite(password)
     bot.press('enter')
     time.sleep(2)
