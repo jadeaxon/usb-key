@@ -412,6 +412,8 @@ if arg1 == '--test':
     exit(0)
 
 pid = os.getpid()
+with open('usb-reactor.pid', 'w') as f:
+    f.write(str(pid))
 print(f'{S}: Engaged!')
 print(f'{S}: PID = {pid}.')
 # This gets passed in by the .bat wrapper that is used for start-at-boot.
