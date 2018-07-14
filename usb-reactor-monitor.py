@@ -1,23 +1,34 @@
 # Monitors whether the usb-reactor process is running.
 # If not, restarts it.
 
-pid = -1
+# From Windows Powershell:
+# PRE: pip3 install wmi
 
 import time
 import os
+import sys
+import subprocess
+
+pid = -1
+
 
 def is_running(pid):
-    """ Check if given process is running. """
-    try:
-        # Signal 0 just asks if the process is running.
-        os.kill(pid, 0)
-    except OSError:
+    # tasklist /FI "PID eq <pid>"
+    # If first line starts with INFO:, then not found.
+    command = f'tasklist /FI "PID eq {pid}"'
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+    (output, error) = p.communicate() # Returns byte sequence.
+    output = output.decode("utf-8") # Convert to string.
+    p_status = p.wait() # Wait for process to finish.
+    if output.startswith("INFO: "):
         return False
     else:
         return True
 
+
 print("Monitoring usb-reactor.")
 while True:
+    sys.stdout.flush()
     time.sleep(5)
     try:
         with open('usb-reactor.pid') as f:
@@ -26,7 +37,6 @@ while True:
         print('WARNING: Failed to read usb-reactor.pid.')
         pid = -1
 
-    print(f'usb-reactor PID = {pid}')
     if pid == -1: continue
 
     if is_running(pid):
