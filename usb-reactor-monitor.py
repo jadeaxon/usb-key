@@ -11,6 +11,7 @@ import subprocess
 
 pid = -1
 
+time.sleep(5) # Give usb-reactor a chance to start at boot.
 
 def is_running(pid):
     # tasklist /FI "PID eq <pid>"
@@ -42,8 +43,8 @@ while True:
     if is_running(pid):
         print(f"Process {pid} is running.")
     else:
-        print(f"Process {pid} is NOT running.")
-
+        print(f"Process {pid} is NOT running.  Restarting process.")
+        os.system("usb-reactor-restart.bat")
 
 
 
