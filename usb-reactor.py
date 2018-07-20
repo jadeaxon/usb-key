@@ -276,8 +276,11 @@ def react_to_drive_disconnection(drive):
     if drive == drive_reacted_to:
         os.startfile(f'{home}\\AppData\\Local\\slack\\slack.exe')
         os.startfile(f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc\\Discord.lnk')
-        os.startfile(f'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk')
-
+        outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk'
+        if not os.path.exists(outlook):
+            # XPS15
+            outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk'
+        os.startfile(outlook)
 
 def get_all_window_titles():
     """ Returns a list of all window titles. """
