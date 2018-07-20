@@ -279,7 +279,9 @@ def react_to_drive_disconnection(drive):
         outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk'
         if not os.path.exists(outlook):
             # XPS15
-            outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk'
+            # For unknown reason, using a link to Outlook does not work (while the Discord link # does).
+            # outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk'
+            outlook = "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE"
         os.startfile(outlook)
 
 def get_all_window_titles():
