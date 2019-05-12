@@ -60,9 +60,20 @@ usb_key = []
 
 firefox_window_title = ""
 
+lastpass_password = ""
+
 first_activation = True # Is this the first time USB key is reacted to?
 drive_reacted_to = "" # The disk drive last successfully reacted to.
 testing = False # Are we running with --test option?
+
+# For get_all_window_titles().
+EnumWindows = ctypes.windll.user32.EnumWindows
+# For some reason, this works on XPS 15 but not on Surface Pro 6.
+# EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_int, ctypes.POINTER(ctypes.c_int))
+GetWindowText = ctypes.windll.user32.GetWindowTextW
+GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
+IsWindowVisible = ctypes.windll.user32.IsWindowVisible
 
 
 #==============================================================================
@@ -194,7 +205,22 @@ def launch_KeePass():
     time.sleep(1)
     bot.hotkey('ctrl', 'c')
     time.sleep(1)
+    lastpass_password = ""
     lastpass_password = read_clipboard()
+    time.sleep(1)
+    if lastpass_password[0] != 'U':
+        # bot.press('enter')
+        time.sleep(1)
+        bot.hotkey('ctrl', 'c')
+        time.sleep(1)
+        lastpass_password = ""
+        lastpass_password = read_clipboard()
+    if lastpass_password[0] != 'U':
+        time.sleep(1)
+        print("ERROR: Failed to get LastPass password.  Exiting.")
+        # exit(1)
+
+    ## print("LastPass password: '{}'".format(lastpass_password))
 
 
 # PRE: launch_KeePass() was successful so that you have the LastPass password saved.
@@ -226,8 +252,13 @@ def launch_LastPass():
     save_to_clipboard('jadeaxon@hotmail.com')
 
     bot.hotkey('ctrl', 'v')
+    time.sleep(1)
     bot.press('tab')
+    time.sleep(1)
     bot.typewrite(lastpass_password)
+    time.sleep(1)
+    bot.press('enter')
+    # The popup keyboard on the Surface Pro sometimes needs this.
     bot.press('enter')
     # BAM!
 
@@ -278,19 +309,23 @@ def react_to_drive_disconnection(drive):
         os.startfile(f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc\\Discord.lnk')
         outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk'
         if not os.path.exists(outlook):
+            # Surface Pro 6
+            outlook = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk"
+        if not os.path.exists(outlook):
             # XPS15
             # For unknown reason, using a link to Outlook does not work (while the Discord link # does).
             # outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk'
             outlook = "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE"
         os.startfile(outlook)
 
+
 def get_all_window_titles():
     """ Returns a list of all window titles. """
-    EnumWindows = ctypes.windll.user32.EnumWindows
-    EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
-    GetWindowText = ctypes.windll.user32.GetWindowTextW
-    GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-    IsWindowVisible = ctypes.windll.user32.IsWindowVisible
+    global EnumWindows
+    global EnumWndowsProc
+    global GetWindowText
+    global GetWindowTextLength
+    global IsWindowVisible
 
     titles = []
     def foreach_window(hwnd, lParam):
@@ -406,6 +441,7 @@ if arg1 == '--test':
     testing = True
     tk = Tk() # Create main window.
     tk.withdraw() # Hide main window.  Else dialog creates visible one.
+
     if askyesno('Run Tests?', 'Do you want to run the tests?'):
         test__read_encrypted_line()
         test__get_all_window_titles()
