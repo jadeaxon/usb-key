@@ -255,12 +255,16 @@ def launch_LastPass():
     time.sleep(1)
     bot.press('tab')
     time.sleep(1)
+
+    # This works on the XPS 15.
     bot.typewrite(lastpass_password)
     time.sleep(1)
     bot.press('enter')
+    time.sleep(1)
     # The popup keyboard on the Surface Pro sometimes needs this.
-    bot.press('enter')
+    ## bot.press('enter')
     # BAM!
+    exit(0)
 
 
 # PRE: mintty.exe (the Cygwin terminal) must not be running as admin.
