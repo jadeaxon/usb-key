@@ -264,7 +264,6 @@ def launch_LastPass():
     # The popup keyboard on the Surface Pro sometimes needs this.
     ## bot.press('enter')
     # BAM!
-    exit(0)
 
 
 # PRE: mintty.exe (the Cygwin terminal) must not be running as admin.
