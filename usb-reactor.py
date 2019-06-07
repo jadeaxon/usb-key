@@ -244,12 +244,19 @@ def launch_LastPass():
     time.sleep(1)
     bot.typewrite('https://lastpass.com/?ac=1&lpnorefresh=1')
     bot.press('enter')
-    time.sleep(15)
+    time.sleep(5)
+    bot.hotkey('ctrl', 'shift', 'r')
+    time.sleep(10)
 
     # Yes indeed!  Having Programmer Dvorak keyboard layout changes what pyautogui
     # types into the LastPass login.  Specifically, the @ becomes a ^.  So, I have
     # to put my e-mail address on the clipboard and paste it instead.
     save_to_clipboard('jadeaxon@hotmail.com')
+
+    # One problem is that the login page is remembering the email.
+    # So, on subsequent visits, we start on the password field, not the email field.
+    # This is where something like Selenium that's aware of the DOM would be better.
+    # Even doing a hard refresh does not clear the email.
 
     bot.hotkey('ctrl', 'v')
     time.sleep(1)
@@ -257,7 +264,9 @@ def launch_LastPass():
     time.sleep(1)
 
     # This works on the XPS 15.
-    bot.typewrite(lastpass_password)
+    ##bot.typewrite(lastpass_password)
+    save_to_clipboard(lastpass_password)
+    bot.hotkey('ctrl', 'v')
     time.sleep(1)
     bot.press('enter')
     time.sleep(1)
@@ -309,7 +318,9 @@ def react_to_drive_disconnection(drive):
     # Also, taking the USB key out is good because it gets really hot if you leave it in forever.
     if drive == drive_reacted_to:
         os.startfile(f'{home}\\AppData\\Local\\slack\\slack.exe')
+
         os.startfile(f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Discord Inc\\Discord.lnk')
+
         outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook 2016.lnk'
         if not os.path.exists(outlook):
             # Surface Pro 6
@@ -320,6 +331,10 @@ def react_to_drive_disconnection(drive):
             # outlook = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk'
             outlook = "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE"
         os.startfile(outlook)
+
+        teams = f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Corporation\\Microsoft Teams.lnk'
+        if os.path.exists(teams):
+            os.startfile(teams)
 
 
 def get_all_window_titles():
