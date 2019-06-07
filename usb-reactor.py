@@ -128,6 +128,15 @@ def react_to_drive_connection(drive):
     global drive_reacted_to
 
     print(f"{S}: Drive {drive} was connected.")
+
+    # Wait for the drive window to pop up and then close it.
+    while True:
+        time.sleep(1)
+        if window_exists(drive):
+            close_window(drive)
+            break
+
+
     if not os.path.exists(local_keyfile_path):
         print(f"{S}: ERROR: Local key file DNE.")
         return
@@ -335,6 +344,26 @@ def react_to_drive_disconnection(drive):
         teams = f'{home}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Corporation\\Microsoft Teams.lnk'
         if os.path.exists(teams):
             os.startfile(teams)
+
+        # Maximize Slack, Teams, and Outlook.
+        time.sleep(7)
+        bot.hotkey('winleft', 't')
+        bot.press('s')
+        bot.press('enter')
+        time.sleep(1)
+        bot.hotkey('winleft', 'up')
+
+        bot.hotkey('winleft', 't')
+        bot.press('m')
+        bot.press('enter')
+        time.sleep(1)
+        bot.hotkey('winleft', 'up')
+
+        bot.hotkey('winleft', 't')
+        bot.press('i')
+        bot.press('enter')
+        time.sleep(1)
+        bot.hotkey('winleft', 'up')
 
 
 def get_all_window_titles():
