@@ -50,8 +50,9 @@ except ValueError:
 S = os.path.basename(S)
 
 # Check the environment.
-user = os.environ['USERNAME'];
-home = os.environ['USERPROFILE'];
+user = os.environ['USERNAME']
+home = os.environ['USERPROFILE']
+host = os.environ['HOSTNAME']
 
 local_keyfile_path = f'{home}\\.ssh\\jadeaxon.usb.key'
 
@@ -500,7 +501,7 @@ if arg1 == '--test':
     exit(0)
 
 pid = os.getpid()
-with open('usb-reactor.pid', 'w') as f:
+with open(f'usb-reactor.{host}.pid', 'w') as f:
     f.write(str(pid))
 print(f'{S}: Engaged!')
 print(f'{S}: PID = {pid}.')

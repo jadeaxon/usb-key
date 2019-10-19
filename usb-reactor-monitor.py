@@ -11,6 +11,8 @@ import subprocess
 
 pid = -1
 
+host = os.environ['HOSTNAME']
+
 time.sleep(5) # Give usb-reactor a chance to start at boot.
 
 def is_running(pid):
@@ -32,10 +34,10 @@ while True:
     sys.stdout.flush()
     time.sleep(5)
     try:
-        with open('usb-reactor.pid') as f:
+        with open(f'usb-reactor.{host}.pid') as f:
             pid = int(f.read().strip())
     except:
-        print('WARNING: Failed to read usb-reactor.pid.')
+        print(f'WARNING: Failed to read usb-reactor.{host}.pid.')
         pid = -1
 
     if pid == -1: continue
