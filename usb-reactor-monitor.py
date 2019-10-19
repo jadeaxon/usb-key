@@ -34,10 +34,10 @@ while True:
     sys.stdout.flush()
     time.sleep(5)
     try:
-        with open(f'usb-reactor.{host}.pid') as f:
+        with open(f'log/usb-reactor.{host}.pid') as f:
             pid = int(f.read().strip())
     except:
-        print(f'WARNING: Failed to read usb-reactor.{host}.pid.')
+        print(f'WARNING: Failed to read log/usb-reactor.{host}.pid.')
         pid = -1
 
     if pid == -1: continue

@@ -501,7 +501,7 @@ if arg1 == '--test':
     exit(0)
 
 pid = os.getpid()
-with open(f'usb-reactor.{host}.pid', 'w') as f:
+with open(f'log/usb-reactor.{host}.pid', 'w') as f:
     f.write(str(pid))
 print(f'{S}: Engaged!')
 print(f'{S}: PID = {pid}.')
